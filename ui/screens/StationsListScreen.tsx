@@ -5,17 +5,32 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
+  TextInput,
 } from "react-native";
 import axios, { AxiosResponse } from "axios";
 import { useNavigation } from "@react-navigation/native";
 import Station from "../../types/Station";
+import SearchBarFilter from "../components/SearchBarFilter";
+import SearchBarResults from "../components/SearchBarResults";
 
 const StationsListScreen: React.FC = () => {
   const [stations, setStations] = useState<Station[]>([]);
+  const [searchValue, setSearchValue] = useState("");
+  const [filteredStations, setFilteredStations] = useState<Station[]>([]);
+
   const navigation = useNavigation();
 
   const navigateToStationDetails = (stationId: string) => {
     navigation.navigate("StationDetailsScreen", { stationId });
+  };
+
+  const handleSearch = (text: string) => {
+    setSearchValue(text);
+    // Filtrer les stations en fonction du nom
+    const filteredStations = stations.filter((station) =>
+      station.name.toLowerCase().includes(text.toLowerCase())
+    );
+    setFilteredStations(filteredStations);
   };
 
   useEffect(() => {
@@ -57,8 +72,14 @@ const StationsListScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Rechercher une station..."
+        value={searchValue}
+        onChangeText={handleSearch}
+      />
       <FlatList
-        data={stations}
+        data={filteredStations}
         renderItem={renderStationItem}
         keyExtractor={(item) => item.number.toString()}
       />
@@ -74,6 +95,12 @@ const styles = StyleSheet.create({
   stationItemContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  searchInput: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
   },
